@@ -1,0 +1,16 @@
+---
+namespace: lstig
+name: general
+version: 1.0.0
+readme: README.md
+authors: [ 'Luke Stigdon' ]
+description: A collection of useful plugins and roles
+license: [ 'MIT' ]
+tags: [ 'utility', 'general', 'common' ]
+dependencies: {}
+repository: https://github.com/lstig/ansible-collection-general
+documentation: https://github.com/lstig/ansible-collection-general/README.md
+homepage: https://github.com/lstig/ansible-collection-general
+issues: https://github.com/lstig/ansible-collection-general/issues
+build_ignore: []
+
