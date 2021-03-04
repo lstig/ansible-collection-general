@@ -85,6 +85,7 @@ except ImportError:
 
 yaml = YAML()
 yaml.default_flow_style = False
+yaml.representer.ignore_aliases = lambda *args: True
 
 
 def dig(dct, keys):
