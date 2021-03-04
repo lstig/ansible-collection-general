@@ -1,4 +1,4 @@
-Ansible Collection - `lstig.general`
+Ansible Collection - lstig.general
 ---
 
 A collection of useful plugins and roles
