@@ -26,7 +26,7 @@ description:
   - This module manges the presence and absence of keys in a YAML file wihtout needing to template the entire file.
 
 extends_documentation_fragment:
-  - ansible.builtin.file
+  - ansible.builtin.files
 
 options:
   dest:
@@ -86,7 +86,6 @@ except ImportError:
 yaml = YAML()
 yaml.default_flow_style = False
 yaml.representer.ignore_aliases = lambda *args: True
-
 
 def dig(dct, keys):
     '''Drill down into a dictionary with the given list of keys'''
