@@ -1,15 +1,8 @@
 #!/usr/bin/python
 
 # Copyright: (c) 2021, Luke Stigdon <contact@lukestigdon.com>
-from __future__ import (absolute_import, division, print_function)
-from ansible.module_utils.basic import AnsibleModule
-from ruamel.yaml import YAML
-from tempfile import NamedTemporaryFile
-from io import StringIO
-import traceback
-import os
-
-from ansible.module_utils.common.parameters import PASS_BOOLS
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
@@ -75,17 +68,25 @@ RETURN = r'''
 ## TODO
 '''
 
+import os
+import traceback
+from io import StringIO
+from tempfile import NamedTemporaryFile
+
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib
+from ansible.module_utils.common._collections_compat import Mapping  # waiting on ansible.module_utils.six
 
 try:
-    # PY3
-    from collections.abc import Mapping
-except ImportError:
-    # PY2
-    from collections import Mapping
+    from ruamel.yaml import YAML
 
-yaml = YAML()
-yaml.default_flow_style = False
-yaml.representer.ignore_aliases = lambda *args: True
+    MISSING_LIB = False
+    yaml = YAML()
+    yaml.default_flow_style = False
+    yaml.representer.ignore_aliases = lambda *args: True
+except ImportError as e:
+    MISSING_LIB_ERROR = e
+    MISSING_LIB = True
+
 
 def dig(dct, keys):
     '''Drill down into a dictionary with the given list of keys'''
@@ -109,14 +110,14 @@ def run_module(module, dest, key, value, state, backup, create, *args, **kwargs)
     diff = dict(
         before='',
         after='',
-        before_header='{} (content)'.format(dest),
-        after_header='{} (content)'.format(dest)
+        before_header='{0} (content)'.format(dest),
+        after_header='{0} (content)'.format(dest)
     )
 
     if not os.path.exists(dest):
         if not create:
             module.fail_json(
-                rc=257, msg='Path {} does not exist!'.format(dest))
+                rc=257, msg='Path {0} does not exist!'.format(dest))
 
         # ensure parent directories exist if we're creating the file
         destdir = os.path.dirname(dest)
@@ -198,7 +199,7 @@ def run_module(module, dest, key, value, state, backup, create, *args, **kwargs)
             # replace current file with the temporary file
             module.atomic_move(tmpfile, dest)
         except IOError:
-            module.fail_json(msg='Could not move tmp file {} to destination {}'.format(
+            module.fail_json(msg='Could not move tmp file {0} to destination {1}'.format(
                 tmpfile, dest), traceback=traceback.format_exc())
 
     return changed, backup_file, diff, msg
@@ -211,8 +212,7 @@ def main():
         dest=dict(type='path', required=True),
         key=dict(type='str', required=True),
         value=dict(type='raw', required=False),
-        state=dict(type='str',  required=True, choices=[
-                   'present', 'absent'], default='present'),
+        state=dict(type='str', required=False, choices=['present', 'absent'], default='present'),
         backup=dict(type='bool', required=False, default=False),
         create=dict(type='bool', required=False, default=True),
     )
@@ -223,6 +223,11 @@ def main():
         add_file_common_args=True,
         supports_check_mode=False  # TODO support check mode
     )
+
+    # exit if any required external module imports failed
+    if MISSING_LIB:
+        module.exit_json(msg=missing_required_lib(MISSING_LIB.name),
+                         exception=MISSING_LIB_ERROR)
 
     # do the stuff
     changed, backup_file, diff, msg = run_module(module, **module.params)
