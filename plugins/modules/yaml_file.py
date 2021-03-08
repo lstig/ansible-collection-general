@@ -26,6 +26,7 @@ options:
     description:
       - Path to the YAML file.
     type: path
+    aliases: ['path']
     required: true
   key:
     description:
@@ -54,10 +55,11 @@ options:
       - If set to C(no), the module will fail if the file does not already exist.
       - By default it will create the file if it is missing.
     type: bool
+    aliases: ['force']
     default: yes
 
 requirements:
-  - ruamel.yaml
+  - "ruamel.yaml>=0.16"
 '''
 
 EXAMPLES = r'''
@@ -114,6 +116,7 @@ def run_module(module, dest, key, value, state, backup, create, *args, **kwargs)
         after_header='{0} (content)'.format(dest)
     )
 
+    data = ''
     if not os.path.exists(dest):
         if not create:
             module.fail_json(
@@ -128,7 +131,7 @@ def run_module(module, dest, key, value, state, backup, create, *args, **kwargs)
             data = f.read()
 
     if module._diff:
-        # if the file was empty ensure it has atleast a newline
+        # if the file was empty ensure it has atleast a newline (for diff output reasons)
         diff['before'] = data if data else '\n'
 
     # parse the yaml
