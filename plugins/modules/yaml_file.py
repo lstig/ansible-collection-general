@@ -63,11 +63,47 @@ requirements:
 '''
 
 EXAMPLES = r'''
-## TODO
-'''
+# manage a key/value in a file
+- name: Set some_setting
+  lstig.general.yaml_file:
+    dest: /etc/foo/config.yaml
+    key: some_setting
+    value: 8080
 
-RETURN = r'''
-## TODO
+- name: Remove some_setting
+  lstig.general.yaml_file:
+    dest: /etc/foo/config.yaml
+    key: some_setting
+    state: absent
+
+# use '.' if the key part of hash e.g.
+# ---
+# some:
+#   nested:
+#     setting: 8080
+- name: Set some_setting
+  lstig.general.yaml_file:
+    dest: /etc/foo/config.yaml
+    key: some.nested.setting
+    value: 8080
+
+# backup up the file before making changes
+- name: Set some_setting but backup the file
+  lstig.general.yaml_file:
+    dest: /etc/foo/config.yaml
+    key: some_setting
+    value: 8080
+    backup: yes
+
+# the module also supports managing file permissions
+- name: Set some_setting and manage file perms
+  lstig.general.yaml_file:
+    dest: /etc/foo/config.yaml
+    owner: root
+    group: wheel
+    mode: '0640'
+    key: some_setting
+    value: 8080
 '''
 
 import os
