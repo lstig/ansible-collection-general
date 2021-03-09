@@ -124,7 +124,7 @@ def run_module(module, dest, key, value, state, backup, create, *args, **kwargs)
 
         # ensure parent directories exist if we're creating the file
         destdir = os.path.dirname(dest)
-        if not os.path.exists(destdir):
+        if destdir and not os.path.exists(destdir):
             os.makedirs(destdir)
     else:
         with open(dest) as f:
@@ -212,12 +212,12 @@ def main():
 
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
-        dest=dict(type='path', required=True),
+        dest=dict(type='path', required=True, aliases=['path']),
         key=dict(type='str', required=True),
         value=dict(type='raw', required=False),
         state=dict(type='str', required=False, choices=['present', 'absent'], default='present'),
         backup=dict(type='bool', required=False, default=False),
-        create=dict(type='bool', required=False, default=True),
+        create=dict(type='bool', required=False, default=True, aliases=['force']),
     )
 
     # instantiate ansible module
